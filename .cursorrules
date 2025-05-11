@@ -1,0 +1,106 @@
+🎯 General Purpose
+The app's goal:
+"Build a web app that uses AI to help YouTube, Instagram, and TikTok creators generate profitable content ideas, improve monetization, and grow their audience."
+
+📦 Architecture
+Use Flask for all back-end logic and API endpoints.
+
+Use HTML/CSS with Bootstrap for front-end design. Keep UI clean, functional, and responsive.
+
+Use vanilla JavaScript only where necessary (form handling, AJAX calls).
+
+Use OpenAI API (or placeholder logic with dummy data if needed for now) for content generation tasks.
+
+🧱 Core MVP Features (Build All for V1)
+Video Idea Generator:
+
+Input: Topic or niche (text field).
+
+Output: List of 5+ high-potential video ideas (title + 1-liner description + "why it works").
+
+Transcript Analyzer:
+
+Input: Paste a transcript or upload .txt file.
+
+Output: Key repeated themes + 3 content angles + 3 new video ideas + optional clip-worthy quotes.
+
+Hashtag & Keyword Generator:
+
+Input: Platform (dropdown) + topic/title (text).
+
+Output: 10 optimized hashtags and keywords tailored for the selected platform.
+
+🧭 UI/UX Rules
+UI must be:
+
+Simple: One to two key actions per page.
+
+Lovable: Clean layout using Bootstrap cards, buttons, alerts.
+
+Complete: No placeholder or unfinished features; all inputs must give usable output.
+
+Each feature section lives on a single-page interface with AJAX-powered updates (no reloads).
+
+Include:
+
+A navbar for navigation.
+
+A footer with contact info + "Feedback" mailto link.
+
+Loading indicators during API calls.
+
+Error messages for invalid input/API failure.
+
+🛡 Code Rules & Flow Enforcement
+Stick to each prompt exactly. Do not infer or improvise — each component is implemented as described in its feature spec.
+
+Single file per concern: Flask app logic in app.py, templates in /templates, static files in /static/css and /static/js.
+
+Every function must be commented (purpose, input, output).
+
+No dead code or unused imports.
+
+Use POST requests for all form submissions.
+
+All AI outputs should be deterministic (set temperature and seed if possible).
+
+No user auth, no DB integration in V1.
+
+Stick to Bootstrap components only for UI — avoid custom CSS unless needed.
+
+Always handle empty states, loading, and errors gracefully.
+
+Run unit tests (if added) with consistent naming and purpose-driven comments.
+
+🔧 Additional Engineering Rules:
+1. Configuration & Secrets:
+   - Require a `.env` file for all secrets (never commit).
+   - Load via `python-dotenv` or `config.from_envvar`.
+2. Modular Structure:
+   - Use Flask Blueprints; isolate each feature's routes, templates, static assets, and tests.
+3. Forms & Security:
+   - Use Flask-WTF for CSRF protection and server-side validation.
+   - Sanitize user inputs before passing to AI services.
+4. Error Handling & Logging:
+   - Define global handlers for HTTP 400, 404, and 500.
+   - Centralize AI/API calls in a service layer with logging of requests, responses, timings, and errors.
+5. API Documentation:
+   - Maintain minimal OpenAPI/Swagger spec (e.g., with `flasgger`).
+   - Reject any request that doesn't match the documented schema.
+6. Deterministic AI Outputs:
+   - Explicitly set `temperature` and a fixed `seed` on all AI calls.
+7. Testing Conventions:
+   - Name unit tests `test_<blueprint>_<feature>_<behavior>.py`.
+   - Cover both happy and error paths; mock AI calls for offline determinism.
+8. UI Consistency:
+   - Provide a `base.html` template with navbar, footer, and loading indicator.
+   - Ensure all pages extend `base.html` and all images/icons have `alt` attributes.
+9. Performance & Build:
+   - Bundle/minify JavaScript (e.g., via an npm script).
+   - Serve static assets with appropriate cache headers.
+10. Documentation:
+    - Maintain a top-level `README.md` with setup and run instructions.
+    - Update it whenever new features or rules are added.
+11. AI Model Choice:
+    - Use only free or open-source AI models (e.g., Hugging Face Transformers, llama.cpp).
+    - Do not use closed, paid AI APIs like OpenAI.
