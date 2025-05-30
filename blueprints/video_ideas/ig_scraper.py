@@ -87,4 +87,8 @@ def fetch_instagram_data(topic):
                     engagement['likes'] = media_item.get('like_count')
                 ideas.append({'caption': caption, 'type': mtype, 'engagement': engagement})
 
-    return suggestions, data2, ideas 
+    return suggestions, data2, ideas
+
+
+
+fetch_instagram_data('fitness')

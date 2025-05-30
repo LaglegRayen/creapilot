@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from blueprints.video_ideas import bp as video_ideas_bp
 from blueprints.transcript_analyzer import bp as transcript_bp
 from blueprints.hashtag_assistant import bp as hashtag_bp
+from blueprints.hashtag_recommender import bp as hashtag_recommender_bp
 
 
 load_dotenv()
@@ -16,6 +17,7 @@ def create_app():
     # - Video idea generator: Generates content ideas based on topic/niche
     # - Transcript analyzer: Analyzes video transcripts for insights
     # - Hashtag assistant: Generates platform-specific hashtags
+    # - Hashtag recommender: Recommends hashtags based on co-occurrence
 
 
     # Register blueprints with URL prefixes to create API endpoints
@@ -23,6 +25,7 @@ def create_app():
     app.register_blueprint(video_ideas_bp, url_prefix='/api/video_ideas')
     app.register_blueprint(transcript_bp, url_prefix='/api/transcript_analyzer')
     app.register_blueprint(hashtag_bp, url_prefix='/api/hashtags')
+    app.register_blueprint(hashtag_recommender_bp, url_prefix='/hashtag-recommender')
 
     register_error_handlers(app)
 

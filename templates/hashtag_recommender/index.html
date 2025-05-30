@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Content Analysis & Hashtag Recommender</h3>
+                </div>
+                <div class="card-body">
+                    <form id="hashtagForm" class="mb-4">
+                        <div class="form-group">
+                            <label for="niche_hashtag">Enter your niche hashtag:</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">#</span>
+                                </div>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="niche_hashtag" 
+                                       name="niche_hashtag" 
+                                       placeholder="e.g., fitness, fashion, food"
+                                       required>
+                            </div>
+                            <small class="form-text text-muted">
+                                Enter a hashtag without the # symbol. We'll analyze top reels and find the best related hashtags.
+                            </small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            Analyze Content
+                        </button>
+                    </form>
+
+                    <div id="results" class="d-none">
+                        <!-- Hashtag Recommendations -->
+                        <div class="mb-5">
+                            <h4 class="mb-3">Recommended Hashtags</h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Hashtag</th>
+                                            <th>Co-occurrence Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recommendationsList">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Top Reels Analysis -->
+                        <div class="mb-5">
+                            <h4 class="mb-3">Top Reels Analysis</h4>
+                            <div id="reelsAnalysis" class="row">
+                                <!-- Reels will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="error" class="alert alert-danger d-none" role="alert">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reel Card Template -->
+<template id="reelCardTemplate">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="embed-responsive embed-responsive-16by9 mb-3">
+                    <video class="embed-responsive-item" controls>
+                        <source src="" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <h5 class="card-title">Reel Analysis</h5>
+                <div class="mb-3">
+                    <h6>Component Importance</h6>
+                    <div class="component-bars">
+                        <!-- Component bars will be inserted here -->
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <h6>Caption</h6>
+                    <p class="card-text caption-text"></p>
+                </div>
+                <div class="mb-3">
+                    <h6>Transcript</h6>
+                    <p class="card-text transcript-text"></p>
+                </div>
+                <a href="#" class="btn btn-outline-primary btn-sm" target="_blank">
+                    View on Instagram
+                </a>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style>
+.component-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.component-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.component-label {
+    min-width: 80px;
+    font-weight: 500;
+}
+
+.progress {
+    flex-grow: 1;
+    height: 1.5rem;
+}
+
+.caption-text, .transcript-text {
+    font-size: 0.9rem;
+    color: #666;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+</style>
+
+<script>
+document.getElementById('hashtagForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const spinner = submitBtn.querySelector('.spinner-border');
+    const results = document.getElementById('results');
+    const error = document.getElementById('error');
+    const recommendationsList = document.getElementById('recommendationsList');
+    const reelsAnalysis = document.getElementById('reelsAnalysis');
+    
+    // Reset UI
+    results.classList.add('d-none');
+    error.classList.add('d-none');
+    spinner.classList.remove('d-none');
+    submitBtn.disabled = true;
+    
+    try {
+        const response = await fetch('/hashtag-recommender', {
+            method: 'POST',
+            body: new FormData(form)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Clear previous results
+            recommendationsList.innerHTML = '';
+            reelsAnalysis.innerHTML = '';
+            
+            // Add hashtag recommendations
+            data.recommendations.forEach(rec => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${rec.hashtag}</td>
+                    <td>${rec.co_occur}</td>
+                `;
+                recommendationsList.appendChild(row);
+            });
+            
+            // Add reel analysis
+            data.media_analysis.forEach(reel => {
+                const template = document.getElementById('reelCardTemplate');
+                const clone = template.content.cloneNode(true);
+                
+                // Set video source
+                const video = clone.querySelector('video source');
+                video.src = reel.media_url;
+                
+                // Set component importance bars
+                const componentBars = clone.querySelector('.component-bars');
+                Object.entries(reel.analysis).forEach(([component, value]) => {
+                    const barDiv = document.createElement('div');
+                    barDiv.className = 'component-bar';
+                    barDiv.innerHTML = `
+                        <span class="component-label">${component}</span>
+                        <div class="progress">
+                            <div class="progress-bar bg-primary" 
+                                 role="progressbar" 
+                                 style="width: ${value}%" 
+                                 aria-valuenow="${value}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                ${value}%
+                            </div>
+                        </div>
+                    `;
+                    componentBars.appendChild(barDiv);
+                });
+                
+                // Set caption and transcript
+                clone.querySelector('.caption-text').textContent = reel.caption;
+                clone.querySelector('.transcript-text').textContent = reel.transcript;
+                
+                // Set Instagram link
+                const instagramLink = clone.querySelector('a');
+                instagramLink.href = reel.permalink;
+                
+                reelsAnalysis.appendChild(clone);
+            });
+            
+            results.classList.remove('d-none');
+        } else {
+            error.textContent = data.error || 'An error occurred';
+            error.classList.remove('d-none');
+        }
+    } catch (err) {
+        error.textContent = 'Failed to get analysis. Please try again.';
+        error.classList.remove('d-none');
+    } finally {
+        spinner.classList.add('d-none');
+        submitBtn.disabled = false;
+    }
+});
+</script>
+{% endblock %} 
