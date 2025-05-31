@@ -1,11 +1,10 @@
 import os
 from flask import Flask, render_template
 from dotenv import load_dotenv
-from blueprints.video_ideas import bp as video_ideas_bp
-from blueprints.transcript_analyzer import bp as transcript_bp
-from blueprints.hashtag_assistant import bp as hashtag_bp
-from blueprints.hashtag_recommender import bp as hashtag_recommender_bp
-
+from blueprints.social_scraper import bp as social_scraper_bp
+from blueprints.lead_finder import bp as lead_finder_bp
+from blueprints.product_research import bp as product_research_bp
+from blueprints.sql_assistant import bp as sql_assistant_bp
 
 load_dotenv()
 
@@ -13,19 +12,10 @@ def create_app():
     app = Flask(__name__, template_folder='templates', static_folder='static')
 
     # Register blueprints
-    # Import blueprints for each core feature:
-    # - Video idea generator: Generates content ideas based on topic/niche
-    # - Transcript analyzer: Analyzes video transcripts for insights
-    # - Hashtag assistant: Generates platform-specific hashtags
-    # - Hashtag recommender: Recommends hashtags based on co-occurrence
-
-
-    # Register blueprints with URL prefixes to create API endpoints
-    # Each blueprint handles its own routes, templates and logic
-    app.register_blueprint(video_ideas_bp, url_prefix='/api/video_ideas')
-    app.register_blueprint(transcript_bp, url_prefix='/api/transcript_analyzer')
-    app.register_blueprint(hashtag_bp, url_prefix='/api/hashtags')
-    app.register_blueprint(hashtag_recommender_bp, url_prefix='/hashtag-recommender')
+    app.register_blueprint(social_scraper_bp, url_prefix='/api/social')
+    app.register_blueprint(lead_finder_bp, url_prefix='/api/leads')
+    app.register_blueprint(product_research_bp, url_prefix='/api/products')
+    app.register_blueprint(sql_assistant_bp, url_prefix='/api/sql')
 
     register_error_handlers(app)
 
